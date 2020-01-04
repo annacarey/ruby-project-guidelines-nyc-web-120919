@@ -17,15 +17,37 @@ class CommandLine
 
     # Allows user to login or sign up
     def login
-        choice = PROMPT.select("Would you like to log in or sign up?", ["Login", "Sign up"])
+        choice = login_prompt
         if choice == "Login"
             username = PROMPT.ask("Username:")
+     
             user = User.find_by(name: username)
-            @@user = user
+            if user == nil
+                PROMPT.error("Username not found")
+                PROMPT.keypress("Try again")
+                puts "\n"
+                login
+            else 
+                @@user = user 
+            end 
+            password = PROMPT.mask("Password:")
+            if @@user.password == password
+                @@user = user
+            else 
+                PROMPT.error("Incorrect password")
+                PROMPT.keypress("Try again")
+                puts "\n"
+                login
+            end 
         elsif choice == "Sign up"
             signup
         end 
+        binding.pry
     end
+
+    def login_prompt 
+        PROMPT.select("Would you like to log in or sign up?", ["Login", "Sign up"])
+    end 
 
     #Allows the user to sign up for a new account
     def signup

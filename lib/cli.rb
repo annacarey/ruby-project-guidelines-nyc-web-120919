@@ -57,6 +57,7 @@ class CommandLine
 
     # Shows menu options
     def menu 
+        system "clear"
         choice = PROMPT.select("Main Menu") do |menu|
             menu.choice "Act Now!" #can choose between friend, family, stranger, gives a kindact
             menu.choice "Share Reflections"
@@ -69,9 +70,11 @@ class CommandLine
         act_now
     elsif choice == "Share Reflections"
         get_reflections
+    elsif choice == "View Past Actions"
+        view_past_actions
     elsif choice == "Exit"
-            exit
-    end
+        exit
+    end 
         puts "\n"
     end
 
@@ -108,13 +111,39 @@ class CommandLine
         puts "\n"
         PROMPT.say("Your last task:" + "\n" + last_action.description + "\n")
         puts "\n"
-        last_action.completion = PROMPT.yes?("Did you complete it?")
+        last_action.update(completion: PROMPT.yes?("Did you complete it?"))
         puts "\n"
-        last_action.reflection = PROMPT.ask("How did it go? (What happened? How did you feel during and after? Did you get any feedback from the other person?)")
+        last_action.update(reflection: PROMPT.ask("How did it go? (What happened? How did you feel during and after? Did you get any feedback from the other person?)"))
         puts "\n"
         PROMPT.ok("Thank you for sharing your reflections!")
         PROMPT.keypress("Return to menu")
         menu 
     end 
+
+    # Allows the user to view all of their previous actions and allows them to look at each one individually to see the reflections
+    def view_past_actions 
+        choice = PROMPT.select("Select the action to view your reflections: \n", get_actions)
+        view_reflections(choice)
+    end
+
+    # Helper method
+    def view_reflections(choice)
+        reflection = Action.find_by(user_id: @@user.id, description: choice).reflection
+        if reflection != nil 
+            PROMPT.say("\n" + "Reflection:" + "\n" + Action.find_by(user_id: @@user.id, description: choice).reflection)
+        else 
+            PROMPT.error("This action has no saved reflections.")
+        end 
+        puts "\n"
+        PROMPT.keypress("Return to menu")
+        menu 
+    end 
+
+    # Helper method to get a list of the users actions in string form 
+    def get_actions 
+        Action.where(user_id: @@user.id).map do |action|
+            action.description 
+        end 
+    end
 
 end 

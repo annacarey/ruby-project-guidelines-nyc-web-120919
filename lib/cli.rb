@@ -63,7 +63,7 @@ class CommandLine
             menu.choice "Share Reflections"
             menu.choice "View Past Actions"
             menu.choice "Add Friend or Family Member" #adds a recipient
-            menu.choice "View Profile" #can view the success rate, streak, etc.
+            menu.choice "Manage Profile" #can view the success rate, streak, etc.
             menu.choice "Exit"
         end
     if choice == "Act Now!"
@@ -72,6 +72,10 @@ class CommandLine
         get_reflections
     elsif choice == "View Past Actions"
         view_past_actions
+    elsif choice == "Add Friend or Family Member"
+        add_recipient
+    elsif choice == "Manage Profile"
+        manage_profile
     elsif choice == "Exit"
         exit
     end 
@@ -113,9 +117,11 @@ class CommandLine
         puts "\n"
         last_action.update(completion: PROMPT.yes?("Did you complete it?"))
         puts "\n"
-        last_action.update(reflection: PROMPT.ask("How did it go? (What happened? How did you feel during and after? Did you get any feedback from the other person?)"))
-        puts "\n"
-        PROMPT.ok("Thank you for sharing your reflections!")
+        if last_action.completion == true 
+            last_action.update(reflection: PROMPT.ask("How did it go? (What happened? How did you feel during and after? Did you get any feedback from the other person?)"))
+            puts "\n"
+            PROMPT.ok("Thank you for sharing your reflections!")
+        end 
         PROMPT.keypress("Return to menu")
         menu 
     end 
@@ -126,7 +132,7 @@ class CommandLine
         view_reflections(choice)
     end
 
-    # Helper method
+    # Allows the user to view the reflections of their selected actions
     def view_reflections(choice)
         reflection = Action.find_by(user_id: @@user.id, description: choice).reflection
         if reflection != nil 
@@ -145,5 +151,72 @@ class CommandLine
             action.description 
         end 
     end
+
+    # Allows the user to add a family member to the database
+    def add_recipient
+        PROMPT.error("Sorry! I haven't implemented this yet")
+        PROMPT.keypress("Return to menu")
+        menu
+    end 
+
+    # Asks the user if they want to change their username, password, or view their performance
+    def manage_profile
+        choice = PROMPT.select("#{@@user.name}, you can:", ["Change username", "Change password", "View Performance"])
+        if choice == "Change username"
+            change_username
+        elsif choice == "Change password"
+            change_password
+        elsif choice == "View Performance"
+            view_profile
+        end 
+        puts "\n"
+        PROMPT.keypress("Return to menu")
+        menu
+    end 
+
+    # Allow the user to change their username 
+    def change_username 
+        password = PROMPT.mask("Please enter your password to change your username")
+        if password == @@user.password 
+            new_username = PROMPT.ask("New username:")
+            @@user.update(name: new_username)
+        else 
+            PROMPT.error("Your password was entered incorrectly")
+            change_username 
+        end 
+        puts "\n"
+        PROMPT.ok("Your new username is #{@@user.name}")
+    end 
+
+    # Allow the user to change their password 
+    def change_password 
+        old_password = PROMPT.mask("Old password:")
+        new_password = PROMPT.mask("New password:")
+        if new_password == PROMPT.mask("Confirm new password:")
+            @@user.update(password: new_password)
+        else 
+            PROMPT.error("Passwords did not match")
+            puts "\n"
+            change_password
+        end 
+        PROMPT.ok("You successfully changed your password!")
+    end 
+
+    # Allow the user to view their profile including their username and success rate
+    def view_profile
+        completed = Action.where(user_id: @@user.id, completion: true)
+        if completed != nil 
+            completed_count = completed.length
+        else 
+            completed_count = 0
+        end 
+        total = Action.where(user_id: @@user.id)
+        if total != nil 
+            total_count = total.length
+        else 
+            total_count = 0 
+        end 
+        PROMPT.say("Hello #{@@user.name}, you have completed #{completed_count} out of #{total_count} total actions.")
+    end 
 
 end 

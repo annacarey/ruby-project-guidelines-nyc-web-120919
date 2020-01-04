@@ -13,8 +13,11 @@
 ActiveRecord::Schema.define(version: 20200104051550) do
 
   create_table "actions", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.integer  "user_id"
+    t.integer  "kindact_id"
+    t.integer  "recipient_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
   end
 
   create_table "kind_acts", force: :cascade do |t|

@@ -3,6 +3,7 @@ class CommandLine
     PROMPT = TTY::Prompt.new
 
     @@user = nil
+    @@act = nil
 
     def run 
         welcome
@@ -29,14 +30,14 @@ class CommandLine
             else
                 @@user = user
                 password = PROMPT.mask("Password:")
-            end 
-            if @@user.password == password
-                @@user = user
-            else 
-                PROMPT.error("Incorrect password")
-                PROMPT.keypress("Try again")
-                puts "\n"
-                login
+                if @@user.password == password
+                    @@user = user
+                else 
+                    PROMPT.error("Incorrect password")
+                    PROMPT.keypress("Try again")
+                    puts "\n"
+                    login
+                end 
             end 
         elsif choice == "Sign up"
             signup
@@ -55,6 +56,7 @@ class CommandLine
         @@user = User.create(name: username, password: password)
     end 
 
+    # Shows menu options
     def menu 
         choice = PROMPT.select("Main Menu") do |menu|
             menu.choice "Act Now!" #can choose between friend, family, stranger, gives a kindact
@@ -69,9 +71,34 @@ class CommandLine
     elsif choice == "Exit"
             exit
         end
+        puts "\n"
     end
 
-    def act_now 
-
+    # Shows the user the random act to take on and allows user to get a new one if they want
+    def act_now
+        puts "\n"
+        @@act = get_random_act
+        PROMPT.say(@@act.description)
+        puts "\n"
+        choice = PROMPT.select("Ready to take this on?", ["Hell yes!", "Pick again", "Return to Menu"])
+        if choice == "Hell yes!"
+            Action.create(user_id: @@user.id, kindact_id: @@act.id)
+            puts "\n"
+            PROMPT.say("Congrats for taking this on! Log back in later to let us know what happened!")
+            puts "\n"
+            PROMPT.keypress("Return to menu")
+            menu 
+        elsif choice == "Pick again"
+            act_now
+        elsif choice == "Return to Menu"
+            menu
+        end
     end 
+
+    # Gets a random act of kindness
+    def get_random_act
+        KindAct.all.sample
+    end 
+
+
 end 

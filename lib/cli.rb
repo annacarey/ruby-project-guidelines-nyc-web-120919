@@ -3,7 +3,6 @@ class CommandLine
     PROMPT = TTY::Prompt.new
 
     @@user = nil
-    @@act = nil
 
     def run 
         welcome
@@ -68,37 +67,54 @@ class CommandLine
         end
     if choice == "Act Now!"
         act_now
+    elsif choice == "Share Reflections"
+        get_reflections
     elsif choice == "Exit"
             exit
-        end
+    end
         puts "\n"
     end
 
     # Shows the user the random act to take on and allows user to get a new one if they want
     def act_now
         puts "\n"
-        @@act = get_random_act
-        PROMPT.say(@@act.description)
+        act = get_random_act
+        PROMPT.say(act.description)
         puts "\n"
         choice = PROMPT.select("Ready to take this on?", ["Hell yes!", "Pick again", "Return to Menu"])
         if choice == "Hell yes!"
-            Action.create(user_id: @@user.id, kindact_id: @@act.id)
+            Action.create(description: act.description, user_id: @@user.id, kindact_id: act.id)
             puts "\n"
-            PROMPT.say("Congrats for taking this on! Log back in later to let us know what happened!")
+            PROMPT.ok("Congrats for taking this on! Log back in later to let us know what happened!")
             puts "\n"
             PROMPT.keypress("Return to menu")
+            system "clear"
             menu 
         elsif choice == "Pick again"
             act_now
         elsif choice == "Return to Menu"
             menu
         end
-    end 
+    end
 
     # Gets a random act of kindness
     def get_random_act
         KindAct.all.sample
     end 
 
+    # Prompts user to share whether or not they completed the action and their written reflections
+    def get_reflections
+        last_action = Action.where(user_id: @@user.id).last
+        puts "\n"
+        PROMPT.say("Your last task:" + "\n" + last_action.description + "\n")
+        puts "\n"
+        last_action.completion = PROMPT.yes?("Did you complete it?")
+        puts "\n"
+        last_action.reflection = PROMPT.ask("How did it go? (What happened? How did you feel during and after? Did you get any feedback from the other person?)")
+        puts "\n"
+        PROMPT.ok("Thank you for sharing your reflections!")
+        PROMPT.keypress("Return to menu")
+        menu 
+    end 
 
 end 

@@ -13,6 +13,9 @@
 ActiveRecord::Schema.define(version: 20200104051550) do
 
   create_table "actions", force: :cascade do |t|
+    t.string   "description"
+    t.string   "reflection"
+    t.boolean  "completion"
     t.integer  "user_id"
     t.integer  "kindact_id"
     t.integer  "recipient_id"
@@ -22,8 +25,6 @@ ActiveRecord::Schema.define(version: 20200104051550) do
 
   create_table "kind_acts", force: :cascade do |t|
     t.string   "description"
-    t.string   "reflection"
-    t.boolean  "completion"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
   end

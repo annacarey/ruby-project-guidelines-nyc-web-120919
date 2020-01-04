@@ -17,7 +17,7 @@ ActiveRecord::Schema.define(version: 20200104051550) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "kindacts", force: :cascade do |t|
+  create_table "kind_acts", force: :cascade do |t|
     t.string   "description"
     t.string   "reflection"
     t.boolean  "completion"
@@ -32,9 +32,9 @@ ActiveRecord::Schema.define(version: 20200104051550) do
   end
 
   create_table "types", force: :cascade do |t|
-    t.string   "CreateTypes"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.string   "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|
